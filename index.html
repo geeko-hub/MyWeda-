@@ -2,401 +2,335 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>MyWeda Niger — Météo locale stylée</title>
+    <title>MyWeda Niger</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Chart.js CDN -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1163/1163661.png">
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <style>
-    /* ===================== FOND ANIMÉ & PARALLAXE ===================== */
-    html, body {
-        height: 100%;
+    /* ==== FOND ANIMÉ PARALLAXE + GLASSMORPHISM ==== */
+    body {
         margin: 0;
-        padding: 0;
+        font-family: 'Montserrat', 'Nunito', 'Roboto', Arial, sans-serif;
+        background: linear-gradient(120deg, #43cea2 0%, #185a9d 100%);
+        min-height: 100vh;
+        color: #1a2633;
+        transition: background 0.8s cubic-bezier(.68,-0.55,.27,1.55), color 0.3s;
         overflow-x: hidden;
-        scroll-behavior: smooth;
-        font-family: 'Montserrat', 'Nunito', Arial, sans-serif;
-        background: linear-gradient(135deg, #8dc6f3 0%, #f3e7e9 100%);
     }
-
-    /* Fond stylé avec effet de scroll (nuages en parallaxe) */
     .parallax-bg {
         position: fixed;
         top: 0; left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100vw; height: 100vh;
+        pointer-events: none;
         z-index: -1;
         overflow: hidden;
-        pointer-events: none;
     }
-    .cloud {
+    .cloud { /* SVG stylisés pour performance */
         position: absolute;
-        opacity: 0.55;
-        background: #fff;
-        border-radius: 50%;
-        filter: blur(3px);
-        animation: cloudmove 38s linear infinite;
+        opacity: 0.62;
+        animation: cloudmove 40s linear infinite;
+        filter: drop-shadow(0 8px 24px #43cea244);
     }
-    .cloud-1 { width: 180px; height: 60px; top: 10%; left: 10%; animation-delay: 0s;}
-    .cloud-2 { width: 240px; height: 80px; top: 32%; left: 70%; animation-delay: 10s;}
-    .cloud-3 { width: 120px; height: 38px; top: 55%; left: 28%; animation-delay: 20s;}
-    .cloud-4 { width: 80px; height: 28px; top: 80%; left: 50%; animation-delay: 15s;}
-    .cloud-5 { width: 120px; height: 38px; top: 65%; left: 5%; animation-delay: 25s;}
-    @keyframes cloudmove {
-        0% { transform: translateX(0);}
-        100% { transform: translateX(60vw);}
-    }
+    .cloud-1 { width: 210px; height: 70px; top: 7%; left: 6%; animation-delay: 0s;}
+    .cloud-2 { width: 280px; height: 92px; top: 29%; left: 58%; animation-delay: 11s;}
+    .cloud-3 { width: 140px; height: 44px; top: 51%; left: 24%; animation-delay: 17s;}
+    .cloud-4 { width: 120px; height: 38px; top: 84%; left: 60%; animation-delay: 19s;}
+    .cloud-5 { width: 128px; height: 42px; top: 69%; left: 9%; animation-delay: 25s;}
+    @keyframes cloudmove { 0% {transform: translateX(0);} 100% {transform: translateX(60vw);} }
 
-    /* Scrollbar stylée */
-    ::-webkit-scrollbar {
-        width: 8px;
-        background: #dbeafe;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #8dc6f3;
-        border-radius: 4px;
-    }
-    body {
-        color: #20324c;
-        min-height: 100vh;
-    }
+    /* SCROLLBAR CUSTOM */
+    ::-webkit-scrollbar { width: 10px; background: #e0f7fa;}
+    ::-webkit-scrollbar-thumb { background: linear-gradient(120deg,#43cea2 10%,#185a9d 90%); border-radius: 6px;}
+    ::selection { background: #43cea2; color: #fff; }
 
-    /* ===================== HEADER ===================== */
+    /* ==== HEADER ULTRA MODERNE ==== */
     .site-header {
         position: sticky;
         top: 0;
-        background: rgba(255,255,255,0.85);
-        backdrop-filter: blur(8px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        z-index: 20;
+        width: 100vw;
+        backdrop-filter: blur(16px);
+        background: rgba(255,255,255,0.77);
+        box-shadow: 0 4px 24px #43cea222;
+        z-index: 50;
         text-align: center;
-        padding: 1.5em 0 1em 0;
-        border-bottom: 2px solid #8dc6f3;
+        padding: 2em 0 1em 0;
+        border-bottom: 2px solid #43cea2;
+        border-radius: 0 0 32px 32px;
+        transition: background 0.4s;
     }
-    .site-header .brand {
+    .brand {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 1em;
+        gap: 1.2em;
+        margin-bottom: 0.3em;
     }
-    .site-header .brand-logo {
-        width: 52px;
-        height: 52px;
-        filter: drop-shadow(0 2px 8px #8dc6f3aa);
+    .brand-logo {
+        width: 62px; height: 62px;
+        filter: drop-shadow(0 8px 24px #43cea244);
         transition: transform 0.2s;
     }
-    .site-header .brand-logo:hover {
-        transform: scale(1.07) rotate(-8deg);
+    .brand-logo:hover { transform: scale(1.13) rotate(-8deg);}
+    h1 {
+        font-size: 2.5em; font-weight: 700; color: #185a9d;
+        letter-spacing: 0.05em; margin: 0;
+        text-shadow: 0 2px 24px #43cea266;
+        font-family: 'Montserrat', Arial, sans-serif;
     }
-    .site-header h1 {
-        font-size: 2.2em;
-        font-weight: 700;
-        color: #2563eb;
-        letter-spacing: 0.04em;
-        margin: 0;
-        text-shadow: 0 2px 12px #f3e7e955;
-    }
-    .site-header .tagline {
-        font-size: 1.07em;
-        color: #0f172a;
-        margin-top: 0.4em;
-        opacity: 0.82;
-        font-family: 'Nunito', Arial, sans-serif;
+    .tagline {
+        font-size: 1.14em; color: #43cea2; font-weight: 600;
+        margin-top: 0.6em; font-family: 'Nunito', Arial, sans-serif;
+        text-shadow: 0 2px 12px #185a9d22;
+        transition: color 0.3s;
     }
     .dark-toggle {
-        position: absolute;
-        right: 2em;
-        top: 1.7em;
-        background: #8dc6f3;
-        color: #2563eb;
-        border: none;
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        font-size: 1.5em;
-        box-shadow: 0 2px 8px #8dc6f355;
-        cursor: pointer;
-        transition: background 0.3s, color 0.3s;
+        position: absolute; right: 2.5em; top: 2.2em;
+        background: #43cea2; color: #185a9d;
+        border: none; border-radius: 50%; width: 42px; height: 42px;
+        font-size: 1.6em; box-shadow: 0 2px 16px #43cea222;
+        cursor: pointer; transition: background 0.3s, color 0.3s;
     }
-    .dark-toggle:hover {
-        background: #2563eb;
-        color: #fff;
-    }
+    .dark-toggle:hover { background: #185a9d; color: #fff;}
 
-    /* ===================== MAIN ===================== */
+    /* ==== MAIN & CARDS GLASSMORPHISM ==== */
     .content {
-        max-width: 550px;
-        margin: 3em auto 0 auto;
-        padding: 0 1.2em 2em 1.2em;
+        max-width: 620px;
+        margin: 3.5em auto 0 auto;
+        padding: 0 1.4em 2em 1.4em;
         background: rgba(255,255,255,0.82);
-        border-radius: 18px;
-        box-shadow: 0 4px 32px #8dc6f355;
+        border-radius: 32px;
+        box-shadow: 0 8px 48px #185a9d33;
         position: relative;
-        z-index: 2;
+        z-index: 3;
+        border: 2px solid #43cea211;
     }
 
-    /* ===================== SEARCH ===================== */
-    .search-zone {
-        margin-bottom: 2.1em;
-    }
+    /* ==== SEARCH ZONE ==== */
+    .search-zone { margin-bottom: 2.4em;}
     .input-group {
-        display: flex;
-        gap: 0.6em;
-        background: #e3f0fb;
-        border-radius: 32px;
-        box-shadow: 0 2px 12px #8dc6f326;
-        padding: 0.27em 0.8em;
-        align-items: center;
+        display: flex; gap: 0.7em;
+        background: rgba(67,206,162,0.08);
+        border-radius: 36px;
+        box-shadow: 0 4px 28px #43cea210;
+        padding: 0.32em 1em; align-items: center;
     }
     .search-field {
-        flex: 1;
-        border: none;
-        outline: none;
-        font-size: 1.08em;
-        background: transparent;
-        color: #2563eb;
-        padding: 0.9em;
+        flex: 1; border: none; outline: none;
+        font-size: 1.17em; background: transparent;
+        color: #185a9d; padding: 1.1em 0.2em;
         font-family: 'Nunito', Arial, sans-serif;
-        border-radius: 24px;
-        letter-spacing: 0.03em;
+        border-radius: 32px; letter-spacing: 0.04em;
+        transition: color 0.2s;
     }
     .search-action {
-        background: #2563eb;
-        color: #fff;
-        border: none;
-        border-radius: 24px;
-        font-size: 1.18em;
-        padding: 0.55em 1.1em;
-        cursor: pointer;
-        font-weight: 700;
-        box-shadow: 0 2px 8px #8dc6f344;
-        transition: background 0.2s;
+        background: linear-gradient(120deg,#185a9d 30%,#43cea2 100%);
+        color: #fff; border: none; border-radius: 32px;
+        font-size: 1.25em; padding: 0.62em 1.3em;
+        cursor: pointer; font-weight: 700;
+        box-shadow: 0 2px 12px #43cea244;
+        transition: background 0.2s, color 0.18s;
     }
     .search-action:hover {
-        background: #1e40af;
-        color: #f3e7e9;
-        box-shadow: 0 2px 16px #2563eb55;
+        background: #43cea2; color: #185a9d; font-weight: 800;
+        box-shadow: 0 2px 24px #43cea244;
     }
 
-    /* ===================== SUGGESTIONS ===================== */
-    .suggestions {
-        position: relative;
-        width: 100%;
-        z-index: 10;
-    }
+    /* ==== SUGGESTIONS ==== */
+    .suggestions { position: relative; width: 100%; z-index: 10;}
     .suggestions ul {
-        background: #fff;
-        margin: 0;
-        padding: 0.2em 0;
-        border-radius: 12px;
-        box-shadow: 0 2px 16px #8dc6f344;
-        border: 1px solid #e3f0fb;
-        list-style: none;
-        max-height: 230px;
-        overflow-y: auto;
+        background: rgba(255,255,255,0.98);
+        margin: 0; padding: 0.3em 0;
+        border-radius: 16px;
+        box-shadow: 0 2px 24px #43cea210;
+        border: 1px solid #43cea211;
+        list-style: none; max-height: 240px; overflow-y: auto;
     }
     .suggestions ul li {
-        padding: 0.75em 1.1em;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        font-size: 1.07em;
-        border-bottom: 1px solid #e3f0fb;
-        transition: background 0.16s;
+        padding: 0.85em 1.2em; cursor: pointer;
+        display: flex; justify-content: space-between;
+        font-size: 1.17em; border-bottom: 1px solid #43cea211;
+        transition: background 0.17s, color 0.17s;
     }
-    .suggestions ul li:last-child { border-bottom: none; }
+    .suggestions ul li:last-child { border-bottom: none;}
     .suggestions ul li:hover {
-        background: #8dc6f333;
-        color: #2563eb;
-        font-weight: 700;
+        background: #43cea222; color: #185a9d; font-weight: 700;
     }
 
-    /* ===================== LOADER ===================== */
+    /* ==== LOADER ANIMÉ ==== */
     .loader {
-        display: flex;
-        align-items: center;
-        gap: 1.1em;
-        margin: 1.2em 0;
-        justify-content: center;
+        display: flex; align-items: center; gap: 1.2em;
+        margin: 1.3em 0; justify-content: center;
     }
     .spinner {
-        width: 30px;
-        height: 30px;
-        border: 4px solid #e3f0fb;
-        border-top: 4px solid #2563eb;
+        width: 38px; height: 38px;
+        border: 4px solid #e0f7fa;
+        border-top: 4px solid #43cea2;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: spin 0.9s linear infinite;
+        box-shadow: 0 2px 16px #43cea244;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin { to {transform: rotate(360deg);} }
 
-    /* ===================== ERROR ===================== */
+    /* ==== ERROR ==== */
     .errorbox {
-        background: #ef4444;
-        color: #fff;
-        padding: 0.8em 1.1em;
-        border-radius: 12px;
-        margin: 1em 0;
-        text-align: center;
-        font-weight: 700;
-        box-shadow: 0 2px 12px #ef444455;
+        background: linear-gradient(90deg,#ef4444 60%,#185a9d 100%);
+        color: #fff; padding: 1em 1.2em;
+        border-radius: 14px; margin: 1.2em 0;
+        text-align: center; font-weight: 800;
+        box-shadow: 0 2px 16px #ef444455;
         font-family: 'Nunito', Arial, sans-serif;
+        font-size: 1.13em;
     }
 
-    /* ===================== WEATHER CARD ===================== */
-    .weather-zone {
-        margin: 1em 0 2em 0;
-    }
+    /* ==== WEATHER CARD ==== */
+    .weather-zone {margin: 1.2em 0 2em 0;}
     .weather-card {
-        background: linear-gradient(120deg,#e3f0fb 60%, #f3e7e9 100%);
-        border-radius: 20px;
-        box-shadow: 0 2px 16px #8dc6f355;
-        padding: 1.4em 1.1em 1.1em 1.1em;
-        margin-bottom: 1.2em;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        background: linear-gradient(120deg,#e0f7fa 60%, #f3e7e9 100%);
+        border-radius: 24px;
+        box-shadow: 0 4px 36px #43cea244;
+        padding: 1.6em 1.4em 1.2em 1.4em;
+        margin-bottom: 1.4em;
+        display: flex; flex-direction: column; align-items: center;
+        animation: fadeInUp 0.9s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(60px);}
+        100% { opacity: 1; transform: translateY(0);}
     }
     .weather-header h2 {
-        margin: 0 0 0.3em 0;
-        font-size: 1.3em;
-        color: #2563eb;
-        font-weight: 700;
-        text-shadow: 0 1px 8px #8dc6f344;
+        margin: 0 0 0.3em 0; font-size: 1.32em;
+        color: #185a9d; font-weight: 700;
+        text-shadow: 0 1px 12px #43cea210;
     }
     .current-weather {
-        display: flex;
-        align-items: center;
-        gap: 1.2em;
-        flex-wrap: wrap;
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
+        display: flex; align-items: center; gap: 1.3em;
+        flex-wrap: wrap; margin-top: 0.6em;
     }
     .weather-icon-large {
-        width: 72px;
-        height:         filter: drop-shadow(0 6px 12px #2563eb22);
+        width: 82px; height: 82px; margin-right: 1em;
+        filter: drop-shadow(0 10px 24px #43cea244);
+        transition: transform 0.2s;
     }
+    .weather-icon-large:hover { transform: scale(1.07);}
     .temperature-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3em;
-        align-items: flex-start;
+        display: flex; flex-direction: column; gap: 0.32em; align-items: flex-start;
     }
     .temperature {
-        font-size: 2.35em;
-        font-weight: 700;
-        color: #1e40af;
-        margin-bottom: 0.12em;
-        text-shadow: 0 2px 12px #8dc6f344;
+        font-size: 2.55em; font-weight: 800;
+        color: #43cea2; margin-bottom: 0.15em;
+        text-shadow: 0 2px 16px #185a9d22;
+        font-family: 'Montserrat', Arial, sans-serif;
     }
     .condition {
-        font-size: 1.07em;
-        color: #2563eb;
-        font-weight: 600;
+        font-size: 1.13em; color: #185a9d; font-weight: 700;
+        font-family: 'Nunito', Arial, sans-serif;
     }
     .weather-details {
-        display: flex;
-        flex-direction: column;
-        gap: 0.6em;
-        min-width: 120px;
-        font-size: 1.01em;
-        color: #10b981;
-        font-family: 'Nunito', Arial, sans-serif;
+        display: flex; flex-direction: column; gap: 0.7em; min-width: 130px;
+        font-size: 1.09em; color: #43cea2; font-family: 'Nunito', Arial, sans-serif;
     }
     .detail-item {
-        font-size: 0.97em;
-        color: #2563eb;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
+        font-size: 1.03em; color: #185a9d; font-weight: 700;
+        display: flex; align-items: center; gap: 0.55em;
     }
 
-    /* ===================== GRAPH CONTROLS ===================== */
-    .graph-controls {
-        margin: 1.7em 0 0.7em 0;
-        text-align: center;
-    }
+    /* ==== GRAPH CONTROLS ==== */
+    .graph-controls {margin: 2em 0 0.9em 0; text-align: center;}
     .tab-btn {
-        background: #2563eb;
-        color: #fff;
-        border: none;
-        padding: 0.6em 1.2em;
-        border-radius: 22px;
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 1em;
-        margin: 0 0.4em;
+        background: linear-gradient(120deg,#43cea2 40%,#185a9d 100%);
+        color: #fff; border: none; padding: 0.68em 1.3em;
+        border-radius: 28px; font-weight: 700;
+        cursor: pointer; font-size: 1.13em; margin: 0 0.5em;
+        box-shadow: 0 2px 16px #43cea244;
         transition: background 0.18s, color 0.18s;
-        box-shadow: 0 2px 8px #8dc6f344;
     }
-    .tab-btn.active,
-    .tab-btn:hover {
-        background: #10b981;
-        color: #2563eb;
+    .tab-btn.active, .tab-btn:hover {
+        background: linear-gradient(120deg,#185a9d 10%,#43cea2 90%);
+        color: #fff;
     }
 
-    /* ===================== CHART ===================== */
+    /* ==== CHART ==== */
     .graph-zone {
-        background: #e3f0fb;
-        border-radius: 20px;
-        box-shadow: 0 2px 16px #8dc6f355;
-        padding: 1.4em 0.8em 1.1em 0.8em;
-        margin-bottom: 2em;
+        background: #e0f7fa;
+        border-radius: 24px;
+        box-shadow: 0 2px 24px #43cea244;
+        padding: 1.5em 0.8em 1.2em 0.8em;
+        margin-bottom: 2.4em;
+        animation: fadeInUp 0.9s cubic-bezier(.68,-0.55,.27,1.55);
     }
-    canvas {
-        width: 100% !important;
-        height: 260px !important;
-    }
+    canvas { width: 100% !important; height: 260px !important; }
 
-    /* ===================== FOOTER ===================== */
+    /* ==== FOOTER ==== */
     .site-footer {
-        background: #f3e7e9;
-        color: #2563eb;
-        text-align: center;
-        padding: 1em 0 0.7em 0;
-        font-size: 1.03em;
-        margin-top: 3em;
-        border-radius: 0 0 18px 18px;
-        box-shadow: 0 -2px 8px #8dc6f344;
+        background: rgba(67,206,162,0.13);
+        color: #185a9d; text-align: center;
+        padding: 1.2em 0 0.7em 0; font-size: 1.07em;
+        margin-top: 3em; border-radius: 0 0 24px 24px;
+        box-shadow: 0 -4px 24px #43cea233;
         font-family: 'Nunito', Arial, sans-serif;
+        letter-spacing: 0.02em;
     }
 
-    /* ===================== RESPONSIVE ===================== */
-    @media (max-width: 600px) {
-        .content { padding: 0 0.3em 2em 0.3em; }
-        .weather-card { padding: 0.9em 0.2em 0.7em 0.2em; }
-        .current-weather { flex-direction: column; gap: 0.8em; }
+    /* ==== RESPONSIVE ==== */
+    @media (max-width: 700px) {
+        .content { padding: 0 0.5em 2em 0.5em; }
+        .weather-card { padding: 1em 0.5em 0.7em 0.5em; }
+        .current-weather { flex-direction: column; gap: 1.1em;}
+        .brand-logo { width: 44px; height: 44px;}
     }
-    @media (max-width: 400px) {
-        .site-header h1 { font-size: 1.35em; }
-        .site-footer { font-size: 0.91em; }
-        .weather-header h2 { font-size: 1.12em; }
+    @media (max-width: 420px) {
+        h1 { font-size: 1.33em;}
+        .site-footer { font-size: 0.91em;}
+        .weather-header h2 { font-size: 1em;}
+        .brand-logo { width: 30px; height: 30px;}
     }
+    /* ==== MODE SOMBRE PREMIUM ==== */
+    body.dark-mode {
+        background: linear-gradient(120deg, #232526 0%, #272b2e 100%);
+        color: #e7f7f7;
+    }
+    body.dark-mode .site-header {
+        background: rgba(34,37,38,0.92);
+        border-bottom: 2px solid #43cea2;
+    }
+    body.dark-mode h1, body.dark-mode .tagline {color: #43cea2;}
+    body.dark-mode .content { background: rgba(34,37,38,0.88);}
+    body.dark-mode .input-group { background: rgba(67,206,162,0.08);}
+    body.dark-mode .search-field { color: #43cea2;}
+    body.dark-mode .search-action { background: linear-gradient(120deg,#43cea2 60%,#185a9d 100%);}
+    body.dark-mode .suggestions ul { background: rgba(34,37,38,0.97);}
+    body.dark-mode .suggestions ul li:hover { background: #185a9d22; color: #43cea2;}
+    body.dark-mode .weather-card, body.dark-mode .graph-zone {
+        background: linear-gradient(120deg,#232526 60%,#185a9d 100%);
+        color: #e7f7f7;
+    }
+    body.dark-mode .temperature { color: #43cea2;}
+    body.dark-mode .site-footer { background: rgba(34,37,38,0.92); color: #43cea2;}
     </style>
 </head>
 <body>
-    <!-- Fond animé -->
+    <!-- Fond animé Parallaxe SVG -->
     <div class="parallax-bg">
-        <div class="cloud cloud-1"></div>
-        <div class="cloud cloud-2"></div>
-        <div class="cloud cloud-3"></div>
-        <div class="cloud cloud-4"></div>
-        <div class="cloud cloud-5"></div>
+        <svg class="cloud cloud-1"><ellipse cx="105" cy="35" rx="105" ry="35" fill="#fff"/></svg>
+        <svg class="cloud cloud-2"><ellipse cx="140" cy="46" rx="140" ry="46" fill="#fff"/></svg>
+        <svg class="cloud cloud-3"><ellipse cx="70" cy="22" rx="70" ry="22" fill="#fff"/></svg>
+        <svg class="cloud cloud-4"><ellipse cx="60" cy="19" rx="60" ry="19" fill="#fff"/></svg>
+        <svg class="cloud cloud-5"><ellipse cx="64" cy="21" rx="64" ry="21" fill="#fff"/></svg>
     </div>
-    <!-- Header -->
+    <!-- HEADER -->
     <header class="site-header">
         <div class="brand">
             <img src="https://cdn-icons-png.flaticon.com/512/1163/1163661.png" alt="Logo météo" class="brand-logo">
             <h1>MyWeda Niger</h1>
         </div>
-        <p class="tagline">Prévisions météo stylées pour chaque commune du Niger</p>
+        <p class="tagline">La météo NextGen, style premium, pour toutes les communes du Niger</p>
         <button id="darkModeToggle" class="dark-toggle" title="Mode sombre">🌙</button>
     </header>
     <main class="content">
-        <!-- Recherche -->
+        <!-- RECHERCHE -->
         <section class="search-zone">
             <div class="input-group">
                 <input id="searchInput" type="text" class="search-field" placeholder="Tapez une ville du Niger...">
@@ -406,27 +340,30 @@
                 <ul id="cityList"></ul>
             </div>
         </section>
-        <!-- Loader -->
+        <!-- LOADER -->
         <div id="loading" class="loader" style="display:none;">
             <span class="spinner"></span>
             <span>Chargement météo...</span>
         </div>
-        <!-- Erreur -->
+        <!-- ERREUR -->
         <div id="errorMessage" class="errorbox" style="display:none;"></div>
-        <!-- Section météo -->
+        <!-- MÉTÉO -->
         <section id="weather" class="weather-zone"></section>
-        <!-- Contrôles du graphique -->
+        <!-- CONTROLES GRAPHIQUE -->
         <div id="chartControls" class="graph-controls" style="display:none;">
             <button id="tempBtn" class="tab-btn active">Température</button>
             <button id="precipBtn" class="tab-btn">Précipitations</button>
         </div>
-        <!-- Graphique -->
+        <!-- GRAPHIQUE -->
         <section id="chartSection" class="graph-zone" style="display:none;">
             <canvas id="forecastChart"></canvas>
         </section>
     </main>
     <footer class="site-footer">
-        <small>© 2025 MyWeda Niger | Open source | Design stylé avec effets scroll & parallaxe</small>
+        <small>
+            © 2025 MyWeda  | Projet personnel premium — UX, UI, Parallaxe, Animations, Responsive, Mode sombre<br>
+            <span style="color:#43cea2; font-weight:700;">Développé par geeko-hub</span>
+        </small>
     </footer>
     <!-- Ton JS -->
     <script src="script.js"></script>
