@@ -2,95 +2,48 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>MyWeda - Météo Niger</title>
+    <title>MyWeda Niger — Météo locale</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Modern CSS -->
     <link rel="stylesheet" href="styles.css">
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Favicon (optionnel) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1163/1163661.png">
 </head>
 <body>
-    <!-- Bouton Mode Sombre -->
-    <button id="darkModeToggle" class="dark-mode-btn" title="Basculer le mode sombre">🌙</button>
-
-    <!-- Animations de fond (nuages) -->
-    <div class="background-animation">
-        <div class="cloud cloud-1"></div>
-        <div class="cloud cloud-2"></div>
-        <div class="cloud cloud-3"></div>
-    </div>
-
-    <!-- Header / Titre -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/1163/1163661.png" alt="Icône météo" class="weather-icon">
-                <h1>MyWeda</h1>
-            </div>
-            <div class="subtitle">Météo rapide et moderne pour toutes les localités du Niger</div>
+    <header class="site-header">
+        <div class="brand">
+            <img src="https://cdn-icons-png.flaticon.com/512/1163/1163661.png" alt="Logo météo" class="brand-logo">
+            <h1>MyWeda</h1>
         </div>
+        <p class="tagline">Prévisions météo pour chaque commune du Niger</p>
+        <button id="darkModeToggle" class="dark-toggle" title="Mode sombre">🌙</button>
     </header>
-
-    <main class="main container">
-        <!-- Section Recherche -->
-        <section class="search-section">
-            <div class="search-container">
-                <div class="search-input-wrapper">
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                    <input id="searchInput" class="search-input" type="text" placeholder="Rechercher une ville du Niger…">
-                    <button id="searchBtn" class="search-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                        Rechercher
-                    </button>
-                </div>
-                <!-- Dropdown villes -->
-                <div id="dropdown" class="dropdown">
-                    <ul id="cityList" class="city-list"></ul>
-                </div>
+    <main class="content">
+        <section class="search-zone">
+            <div class="input-group">
+                <input id="searchInput" type="text" class="search-field" placeholder="Tapez une ville du Niger...">
+                <button id="searchBtn" class="search-action">🔍</button>
+            </div>
+            <div id="dropdown" class="suggestions">
+                <ul id="cityList"></ul>
             </div>
         </section>
-
-        <!-- Loader -->
-        <div id="loading" class="loading" style="display:none;">
-            <div class="loading-spinner"></div>
-            <div>Chargement des données météo…</div>
+        <div id="loading" class="loader" style="display:none;">
+            <span class="spinner"></span>
+            <span>Chargement météo...</span>
         </div>
-        <!-- Erreur -->
-        <div id="errorMessage" class="error-message" style="display:none;"></div>
-
-        <!-- Section météo -->
-        <section id="weather" class="weather-section"></section>
-
-        <!-- Contrôles du graphique -->
-        <div id="chartControls" class="chart-controls" style="display:none;">
-            <div class="control-buttons">
-                <button id="tempBtn" class="control-btn active">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                    Température
-                </button>
-                <button id="precipBtn" class="control-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 16a4 4 0 1 1 8 0"/><path d="M12 12v4"/></svg>
-                    Précipitations
-                </button>
-            </div>
+        <div id="errorMessage" class="errorbox" style="display:none;"></div>
+        <section id="weather" class="weather-zone"></section>
+        <div id="chartControls" class="graph-controls" style="display:none;">
+            <button id="tempBtn" class="tab-btn active">Température</button>
+            <button id="precipBtn" class="tab-btn">Précipitations</button>
         </div>
-
-        <!-- Section du graphique -->
-        <section id="chartSection" class="chart-section" style="display:none;">
-            <div class="chart-container">
-                <canvas id="forecastChart"></canvas>
-            </div>
+        <section id="chartSection" class="graph-zone" style="display:none;">
+            <canvas id="forecastChart"></canvas>
         </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        © 2024 MyWeda — Projet météo pour toutes les localités du Niger
+    <footer class="site-footer">
+        <small>© 2025 MyWeda | Open source</small>
     </footer>
-
-    <!-- Ton JS -->
     <script src="script.js"></script>
 </body>
 </html>
