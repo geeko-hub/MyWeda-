@@ -4,13 +4,20 @@
     <meta charset="UTF-8">
     <title>MyWeda Niger</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Favicon & PWA icons -->
+    <link rel="icon" type="image/png" href="MyWeda-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="MyWeda-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="MyWeda-512.png">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1163/1163661.png">
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-    /* ==== FOND ANIMÉ PARALLAXE + GLASSMORPHISM ==== */
+    /* ==== FOND ANIMÉ PARALLAXE & GLASSMORPHISM ==== */
     body {
         margin: 0;
         font-family: 'Montserrat', 'Nunito', 'Roboto', Arial, sans-serif;
@@ -23,55 +30,37 @@
     .parallax-bg {
         position: fixed;
         top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        pointer-events: none;
-        z-index: -1;
-        overflow: hidden;
+        width: 100vw; height: 100vh; z-index: -1; pointer-events: none; overflow: hidden;
     }
-    .cloud { /* SVG stylisés pour performance */
-        position: absolute;
-        opacity: 0.62;
-        animation: cloudmove 40s linear infinite;
-        filter: drop-shadow(0 8px 24px #43cea244);
-    }
+    .cloud { position: absolute; opacity: 0.62; animation: cloudmove 40s linear infinite; filter: drop-shadow(0 8px 24px #43cea244);}
     .cloud-1 { width: 210px; height: 70px; top: 7%; left: 6%; animation-delay: 0s;}
     .cloud-2 { width: 280px; height: 92px; top: 29%; left: 58%; animation-delay: 11s;}
     .cloud-3 { width: 140px; height: 44px; top: 51%; left: 24%; animation-delay: 17s;}
     .cloud-4 { width: 120px; height: 38px; top: 84%; left: 60%; animation-delay: 19s;}
     .cloud-5 { width: 128px; height: 42px; top: 69%; left: 9%; animation-delay: 25s;}
     @keyframes cloudmove { 0% {transform: translateX(0);} 100% {transform: translateX(60vw);} }
-
-    /* SCROLLBAR CUSTOM */
     ::-webkit-scrollbar { width: 10px; background: #e0f7fa;}
     ::-webkit-scrollbar-thumb { background: linear-gradient(120deg,#43cea2 10%,#185a9d 90%); border-radius: 6px;}
     ::selection { background: #43cea2; color: #fff; }
 
-    /* ==== HEADER ULTRA MODERNE ==== */
+    /* ==== HEADER PREMIUM ==== */
     .site-header {
-        position: sticky;
-        top: 0;
-        width: 100vw;
+        position: sticky; top: 0; width: 100vw;
         backdrop-filter: blur(16px);
         background: rgba(255,255,255,0.77);
         box-shadow: 0 4px 24px #43cea222;
-        z-index: 50;
-        text-align: center;
+        z-index: 50; text-align: center;
         padding: 2em 0 1em 0;
         border-bottom: 2px solid #43cea2;
         border-radius: 0 0 32px 32px;
         transition: background 0.4s;
     }
     .brand {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1.2em;
-        margin-bottom: 0.3em;
+        display: flex; align-items: center; justify-content: center; gap: 1.2em; margin-bottom: 0.3em;
     }
     .brand-logo {
         width: 62px; height: 62px;
-        filter: drop-shadow(0 8px 24px #43cea244);
-        transition: transform 0.2s;
+        filter: drop-shadow(0 8px 24px #43cea244); transition: transform 0.2s;
     }
     .brand-logo:hover { transform: scale(1.13) rotate(-8deg);}
     h1 {
@@ -83,8 +72,7 @@
     .tagline {
         font-size: 1.14em; color: #43cea2; font-weight: 600;
         margin-top: 0.6em; font-family: 'Nunito', Arial, sans-serif;
-        text-shadow: 0 2px 12px #185a9d22;
-        transition: color 0.3s;
+        text-shadow: 0 2px 12px #185a9d22; transition: color 0.3s;
     }
     .dark-toggle {
         position: absolute; right: 2.5em; top: 2.2em;
@@ -97,7 +85,7 @@
 
     /* ==== MAIN & CARDS GLASSMORPHISM ==== */
     .content {
-        max-width: 620px;
+        max-width: 650px;
         margin: 3.5em auto 0 auto;
         padding: 0 1.4em 2em 1.4em;
         background: rgba(255,255,255,0.82);
@@ -263,6 +251,10 @@
     }
     canvas { width: 100% !important; height: 260px !important; }
 
+    /* ==== LEAFLET MAP ==== */
+    #mapZone { margin:2em 0;}
+    #map { height:320px; border-radius:18px; box-shadow: 0 2px 24px #43cea233; }
+
     /* ==== FOOTER ==== */
     .site-footer {
         background: rgba(67,206,162,0.13);
@@ -280,12 +272,14 @@
         .weather-card { padding: 1em 0.5em 0.7em 0.5em; }
         .current-weather { flex-direction: column; gap: 1.1em;}
         .brand-logo { width: 44px; height: 44px;}
+        #map { height: 220px;}
     }
     @media (max-width: 420px) {
         h1 { font-size: 1.33em;}
         .site-footer { font-size: 0.91em;}
         .weather-header h2 { font-size: 1em;}
         .brand-logo { width: 30px; height: 30px;}
+        #map { height: 120px;}
     }
     /* ==== MODE SOMBRE PREMIUM ==== */
     body.dark-mode {
@@ -303,7 +297,7 @@
     body.dark-mode .search-action { background: linear-gradient(120deg,#43cea2 60%,#185a9d 100%);}
     body.dark-mode .suggestions ul { background: rgba(34,37,38,0.97);}
     body.dark-mode .suggestions ul li:hover { background: #185a9d22; color: #43cea2;}
-    body.dark-mode .weather-card, body.dark-mode .graph-zone {
+    body.dark-mode .weather-card, body.dark-mode .graph-zone, body.dark-mode #mapZone {
         background: linear-gradient(120deg,#232526 60%,#185a9d 100%);
         color: #e7f7f7;
     }
@@ -323,7 +317,7 @@
     <!-- HEADER -->
     <header class="site-header">
         <div class="brand">
-            <img src="https://cdn-icons-png.flaticon.com/512/1163/1163661.png" alt="Logo météo" class="brand-logo">
+            <img src="MyWeda-192.png" alt="Logo météo" class="brand-logo">
             <h1>MyWeda Niger</h1>
         </div>
         <p class="tagline">La météo NextGen, style premium, pour toutes les communes du Niger</p>
@@ -333,8 +327,8 @@
         <!-- RECHERCHE -->
         <section class="search-zone">
             <div class="input-group">
-                <input id="searchInput" type="text" class="search-field" placeholder="Tapez une ville du Niger...">
-                <button id="searchBtn" class="search-action">🔍</button>
+                <input id="searchInput" type="text" class="search-field" placeholder="Tapez une ville du Niger..." aria-label="Recherche ville Niger">
+                <button id="searchBtn" class="search-action" aria-label="Rechercher">🔍</button>
             </div>
             <div id="dropdown" class="suggestions">
                 <ul id="cityList"></ul>
@@ -346,7 +340,7 @@
             <span>Chargement météo...</span>
         </div>
         <!-- ERREUR -->
-        <div id="errorMessage" class="errorbox" style="display:none;"></div>
+        <div id="errorMessage" class="errorbox" style="display:none;" role="alert"></div>
         <!-- MÉTÉO -->
         <section id="weather" class="weather-zone"></section>
         <!-- CONTROLES GRAPHIQUE -->
@@ -358,14 +352,71 @@
         <section id="chartSection" class="graph-zone" style="display:none;">
             <canvas id="forecastChart"></canvas>
         </section>
+        <!-- CARTE INTERACTIVE -->
+        <section id="mapZone">
+            <h2 style="text-align:center;">Carte interactive du Niger</h2>
+            <div id="map"></div>
+        </section>
     </main>
     <footer class="site-footer">
         <small>
-            © 2025 MyWeda  | Projet personnel premium — UX, UI, Parallaxe, Animations, Responsive, Mode sombre<br>
-            <span style="color:#43cea2; font-weight:700;">Développé par geeko-hub</span>
+            © 2025 MyWeda |Météo pour le Niger <br>
+            <span style="color:#43cea2; font-weight:700;">Développé par GeekoHub</span>
         </small>
     </footer>
-    <!-- Ton JS -->
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Ton JS principal -->
     <script src="script.js"></script>
+    <!-- Enregistrement du Service Worker PWA -->
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(reg => {
+          console.log('Service Worker enregistré!', reg);
+        }).catch(err => {
+          console.error('Erreur Service Worker:', err);
+        });
+      });
+    }
+    </script>
+    <!-- Activation notifications locales -->
+    <script>
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+    function sendNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg) reg.showNotification(title, { body: body, icon: 'MyWeda-192.png' });
+        });
+      }
+    }
+    // Exemple d'appel automatique après affichage météo :
+    // sendNotification('Nouvelle météo disponible!', 'Consulte la météo de Niamey.');
+    </script>
+    <!-- Carte interactive Leaflet -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Affiche la carte centrée sur le Niger
+      const map = L.map('map').setView([17.6078, 8.0817], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      // Exemple de villes (ajoute-en plus facilement)
+      const villes = [
+        {nom: "Niamey", lat: 13.5128, lon: 2.1128},
+        {nom: "Agadez", lat: 16.9736, lon: 7.9911},
+        {nom: "Zinder", lat: 13.779, lon: 8.9881},
+        {nom: "Maradi", lat: 13.5, lon: 7.1}
+      ];
+      villes.forEach(ville => {
+        L.marker([ville.lat, ville.lon])
+          .addTo(map)
+          .bindPopup(`<strong>${ville.nom}</strong>`);
+      });
+    });
+    </script>
 </body>
 </html>
