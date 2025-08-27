@@ -1,204 +1,527 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>MyWeda</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyWeda — La météo pour le Niger en un clic</title>
+  <meta name="description" content="MyWeda — Service météo NextGen pour le Niger. Prévisions instantanées, cartes interactives, conseils pratiques." />
+  <meta name="theme-color" content="#0ea5e9" />
 
-    <!-- Manifest PWA & Icons -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="MyWeda-192.png">
-    <link rel="apple-touch-icon" href="MyWeda-192.png">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS (cartes) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js (sera utilisé par script.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Leaflet Map CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <!-- ========== Styling (CSS complet, premium) ========== -->
+  <style>
+  /* -----------------------
+     Reset & base
+     ----------------------- */
+  :root{
+    --bg-1: #f6f9ff;
+    --bg-2: #eef2ff;
+    --panel: rgba(255,255,255,0.75);
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: linear-gradient(90deg,#06b6d4,#6366f1);
+    --primary: #06b6d4;
+    --sun: #f59e0b;
+    --glass-border: rgba(255,255,255,0.6);
+    --card-shadow: 0 12px 40px rgba(2,6,23,0.06);
+    --glass-blur: 8px;
+    --focus-ring: 0 0 0 6px rgba(14,165,233,0.08);
+  }
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  /* Dark theme tokens - toggled on body.dark-mode */
+  body.dark-mode {
+    --bg-1: #020617;
+    --bg-2: #071133;
+    --panel: rgba(8,12,24,0.62);
+    --text: #e6eef8;
+    --muted: #94a3b8;
+    --glass-border: rgba(255,255,255,0.04);
+    --card-shadow: 0 10px 40px rgba(0,0,0,0.65);
+    --focus-ring: 0 0 0 6px rgba(59,130,246,0.08);
+  }
 
-    <style>
-        /* Configuration de base avec la police Inter */
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+  html,body { height:100%; }
+  body{
+    margin:0;
+    min-height:100%;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg-1),var(--bg-2));
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    transition: background 420ms ease, color 300ms ease;
+    overflow-y: auto;
+  }
 
-        /* Effet "Aurore Boréale" pour le fond */
-        .aurora-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
+  /* Aurora subtle background (animated) */
+  .aurora {
+    position: fixed;
+    inset: -10% -10% auto -10%;
+    height: 140vh;
+    pointer-events:none;
+    z-index: -10;
+    background-image:
+      radial-gradient(600px 300px at 10% 10%, rgba(6,182,212,0.06), transparent 20%),
+      radial-gradient(700px 300px at 90% 80%, rgba(245,158,11,0.04), transparent 25%),
+      radial-gradient(500px 250px at 50% 30%, rgba(139,92,246,0.03), transparent 18%);
+    mix-blend-mode: screen;
+    opacity:0.95;
+    animation: auroraMove 24s linear infinite alternate;
+    filter: blur(8px) saturate(1.05);
+  }
+  @keyframes auroraMove {
+    from{ transform: translateY(-4%) translateX(-2%) rotate(0deg); }
+    to{ transform: translateY(4%) translateX(2%) rotate(6deg); }
+  }
 
-        .aurora-bg::before, .aurora-bg::after {
-            content: '';
-            position: absolute;
-            width: 800px;
-            height: 800px;
-            border-radius: 50%;
-            filter: blur(150px);
-            mix-blend-mode: screen;
-            animation: aurora-flow 20s linear infinite alternate;
-        }
+  /* Layout container */
+  .wrap {
+    max-width:1200px;
+    margin: 28px auto;
+    padding: 0 20px 80px;
+  }
 
-        .aurora-bg::before {
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(59, 130, 246, 0) 70%);
-            top: -20%;
-            left: -20%;
-        }
+  /* ========== Header (hero) ========== */
+  header.hero {
+    display:flex;
+    gap:20px;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px;
+    border-radius:18px;
+    background: var(--panel);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
+    transition: transform 360ms cubic-bezier(.2,.9,.3,1);
+  }
+  header.hero:focus-within { transform: translateY(-3px); }
 
-        .aurora-bg::after {
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0) 70%);
-            bottom: -20%;
-            right: -20%;
-            animation-delay: -10s;
-        }
-        
-        body.dark-mode .aurora-bg::before {
-             background: radial-gradient(circle, rgba(20, 83, 45, 0.5) 0%, rgba(22, 101, 52, 0) 70%);
-        }
-        body.dark-mode .aurora-bg::after {
-            background: radial-gradient(circle, rgba(30, 64, 175, 0.4) 0%, rgba(37, 99, 235, 0) 70%);
-        }
+  .brand {
+    display:flex;
+    gap:18px;
+    align-items:center;
+  }
 
-        @keyframes aurora-flow {
-            from { transform: translateX(-10%) translateY(5%) rotate(0deg); }
-            to { transform: translateX(10%) translateY(-5%) rotate(30deg); }
-        }
+  /* Text logo */
+  .logo-block {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .logo-title {
+    font-size: clamp(28px, 4.6vw, 46px);
+    line-height:1;
+    font-weight:900;
+    letter-spacing:-0.02em;
+    background: linear-gradient(90deg,#111827, #111827);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color: var(--text); /* fallback */
+    position:relative;
+    z-index:2;
+    display:inline-block;
+  }
+  /* Elegant gradient for title, animated */
+  .logo-title .gradient {
+    background: linear-gradient(90deg,#06b6d4,#6366f1,#f59e0b);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation: titleShine 6s linear infinite;
+    background-size: 200% 200%;
+  }
+  @keyframes titleShine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 
-        /* Animation d'apparition personnalisée */
-        @keyframes fade-in-up {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-            animation: fade-in-up 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-        }
-        
-        /* Style pour les boutons de graphique actifs */
-        .tab-btn.active {
-            background: linear-gradient(120deg, #0ea5e9, #6366f1);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
-    </style>
+  /* tagline */
+  .tagline {
+    font-weight:700;
+    color:var(--muted);
+    font-size: 0.95rem;
+    transform: translateY(2px);
+  }
+
+  /* stacked icons (sun + cloud) */
+  .logo-icons {
+    position: relative;
+    width:64px;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-left:4px;
+    filter: drop-shadow(0 12px 26px rgba(6,182,212,0.08));
+  }
+  .logo-icons svg {
+    position:absolute;
+    transition: transform 420ms cubic-bezier(.2,.9,.3,1), filter 420ms;
+    transform-origin:center;
+  }
+  .logo-icons .cloud {
+    left: -8px;
+    width:54px;
+    height:44px;
+    fill:#06b6d4;
+    opacity:0.98;
+    filter: drop-shadow(0 10px 20px rgba(6,182,212,0.14));
+  }
+  .logo-icons .sun {
+    right:-4px;
+    width:40px;
+    height:40px;
+    fill: #f59e0b;
+    transform: translate(8px,-8px) rotate(-8deg);
+    filter: drop-shadow(0 12px 24px rgba(245,158,11,0.12));
+  }
+  .logo-icons:hover .sun { transform: translate(0px,-14px) rotate(-8deg) scale(1.03); }
+  .logo-icons:hover .cloud { transform: translate(-4px,2px) scale(1.02); }
+
+  /* moon toggle */
+  .controls {
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  #darkModeToggle {
+    width:48px;
+    height:48px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.03);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition: transform 160ms ease, box-shadow 200ms;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+    font-size:18px;
+  }
+  #darkModeToggle:active { transform: translateY(1px) scale(0.99); }
+  #darkModeToggle:focus { outline:none; box-shadow: var(--focus-ring); border-color: rgba(14,165,233,0.2); }
+
+  /* ========== Search bar (hero related) ========== */
+  .search-wrap {
+    display:flex;
+    justify-content:center;
+    margin:18px auto 0;
+  }
+  .search {
+    width:100%;
+    max-width:920px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    padding:10px;
+    border-radius:999px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.35));
+    box-shadow: 0 10px 28px rgba(2,6,23,0.04);
+    transition: box-shadow 240ms, transform 200ms;
+  }
+  body.dark-mode .search { background: linear-gradient(180deg, rgba(8,12,24,0.62), rgba(8,12,24,0.46)); }
+
+  .search input[type="search"] {
+    border:0; outline:none; background:transparent; padding:12px 10px; font-size:1rem; flex:1; color:inherit;
+  }
+  .search button.search-btn {
+    width:52px; height:44px; border-radius:12px; border:0; cursor:pointer; font-weight:800;
+    background: linear-gradient(90deg,#06b6d4,#6366f1); color:white; box-shadow: 0 8px 22px rgba(6,182,212,0.14);
+    transition: transform 160ms;
+  }
+  .search button.search-btn:active { transform: scale(0.98); }
+
+  /* dropdown autocomplete */
+  #dropdown { position: relative; max-width:920px; margin: 8px auto 0; }
+  #cityList {
+    position:absolute;
+    left:0; right:0; top:0; transform: translateY(64px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92));
+    border-radius:12px; list-style:none; padding:8px; margin:0; box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+    max-height:260px; overflow:auto; z-index:110;
+    transition: opacity 200ms ease, transform 200ms ease;
+    border: 1px solid rgba(0,0,0,0.03);
+  }
+  body.dark-mode #cityList { background: rgba(8,12,24,0.95); border:1px solid rgba(255,255,255,0.03); }
+  #cityList li {
+    padding:10px 12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:12px;
+    cursor:pointer; color:var(--text); font-weight:700;
+  }
+  #cityList li .city-region { font-size:0.9rem; color:var(--muted); font-weight:600; }
+  #cityList li:hover { background: linear-gradient(90deg, rgba(6,182,212,0.06), rgba(99,102,241,0.04)); }
+
+  /* ========== Main sections & cards ========== */
+  main { margin-top:22px; }
+  .grid {
+    display:grid;
+    grid-template-columns: 1fr 420px;
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width:980px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border-radius:14px;
+    padding:16px;
+    box-shadow: var(--card-shadow);
+    border:1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
+    transition: transform 360ms cubic-bezier(.2,.9,.3,1), box-shadow 240ms;
+  }
+  .card:focus-within { transform: translateY(-6px); box-shadow: 0 22px 58px rgba(2,6,23,0.12); }
+
+  /* Top weather area placeholders (script.js will inject content into #weather) */
+  #weather {
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .weather-header { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .weather-header h2 { margin:0; font-size:1.3rem; font-weight:900; letter-spacing:-0.02em; }
+  .weather-meta { color:var(--muted); font-weight:700; }
+
+  /* forecast chart area (script.js shows/hides) */
+  #chartControls { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+  #chartControls .tab { padding:8px 14px; border-radius:999px; cursor:pointer; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.02); font-weight:800; }
+  #chartControls .tab.active { background: linear-gradient(90deg,#06b6d4,#6366f1); color:white; transform: translateY(-4px); box-shadow: 0 14px 40px rgba(99,102,241,0.12); }
+
+  canvas#forecastChart { width:100% !important; height:260px !important; }
+
+  /* Hourly forecast list (right column) */
+  .hourly-list { display:flex; flex-direction:column; gap:10px; max-height:360px; overflow:auto; padding-right:6px; }
+  .hour-item {
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding:8px;background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent); border-radius:10px; font-weight:700;
+  }
+
+  /* Advice / alerts area (appealing colors) */
+  .advice {
+    margin-top:10px;
+    padding:12px; border-radius:12px;
+    background: linear-gradient(90deg, rgba(6,182,212,0.06), rgba(99,102,241,0.03));
+    color: var(--text); font-weight:800;
+  }
+  .advice.rain { background: linear-gradient(90deg, rgba(6,182,212,0.12), rgba(14,165,233,0.03)); color:#063c4b; }
+  .advice.heat { background: linear-gradient(90deg, rgba(245,158,11,0.12), rgba(249,115,22,0.03)); color:#5b2f00; }
+
+  /* Map container */
+  #map { width:100%; height:360px; border-radius:12px; overflow:hidden; box-shadow: 0 10px 30px rgba(2,6,23,0.08); }
+
+  /* Footer */
+  footer.site {
+    text-align:center; color:var(--muted); margin-top:22px; font-weight:700;
+  }
+
+  /* Loading & error states (script.js toggles display) */
+  #loading { display:none; text-align:center; color:var(--muted); padding:12px; font-weight:800; }
+  #errorMessage { display:none; padding:10px; border-radius:10px; color:#991b1b; background:rgba(239,68,68,0.06); font-weight:800; }
+
+  /* Reveal on scroll helper (script.js can add 'visible' class or we can animate via CSS) */
+  .reveal { opacity:0; transform: translateY(18px); transition: all 700ms cubic-bezier(.2,.9,.3,1); will-change:transform,opacity; }
+  .reveal.visible { opacity:1; transform:none; }
+
+  /* small screens */
+  @media (max-width:640px) {
+    .logo-icons { display:none; }
+    .logo-title { font-size: 28px; }
+    header.hero { padding:12px; border-radius:12px; }
+    #map { height:220px; }
+  }
+
+  /* Accessibility focus states for interactive elements */
+  button:focus, a:focus, input:focus { outline: none; box-shadow: var(--focus-ring); border-radius:10px; }
+
+  /* Extra micro-animations to feel premium */
+  .floaty { animation: floaty 6s ease-in-out infinite; }
+  @keyframes floaty {
+    0%{ transform: translateY(0); }
+    50%{ transform: translateY(-6px); }
+    100%{ transform: translateY(0); }
+  }
+
+  </style>
+  <!-- End style -->
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 transition-colors duration-500">
+<body>
+  <div class="aurora" aria-hidden="true"></div>
 
-    <!-- Fond animé "Aurore" -->
-    <div class="aurora-bg"></div>
-
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-4">
-            <div class="my-4 p-4 bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg rounded-2xl shadow-lg shadow-slate-200/40 dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <img src="MyWeda-192.png" alt="Logo MyWeda" class="w-12 h-12 md:w-14 md:h-14 transition-transform duration-300 hover:scale-110 hover:rotate-[-12deg]">
-                    <div>
-                        <h1 class="text-xl md:text-3xl font-extrabold text-slate-900 dark:text-white">MyWeda Niger</h1>
-                        <p class="text-xs md:text-sm text-sky-600 dark:text-sky-400 font-medium">La météo NextGen pour le Niger</p>
-                    </div>
-                </div>
-                <button id="darkModeToggle" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 dark:focus:ring-offset-slate-900" title="Changer de thème">
-                    <span class="dark:hidden">🌙</span>
-                    <span class="hidden dark:inline">☀️</span>
-                </button>
-            </div>
+  <div class="wrap">
+    <!-- HERO / Header -->
+    <header class="hero" role="banner" aria-label="En-tête MyWeda">
+      <div class="brand" style="align-items:center;">
+        <div class="logo-icons" aria-hidden="true" title="MyWeda">
+          <!-- Cloud (blue) -->
+          <svg class="cloud floaty" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M48 28H20a10 10 0 010-20c0-6 6-10 12-8 2-4 8-6 12-3 6 4 6 12 4 18 4 1 8 5 8 13z"></path>
+          </svg>
+          <!-- Sun (yellow) -->
+          <svg class="sun" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="30" cy="30" r="10"></circle>
+            <g stroke="#fff3d1" stroke-width="2" stroke-linecap="round">
+              <path d="M30 4v6"/>
+              <path d="M30 56v6"/>
+              <path d="M4 30h6"/>
+              <path d="M56 30h6"/>
+            </g>
+          </svg>
         </div>
+
+        <div class="logo-block" role="img" aria-label="MyWeda — La météo pour le Niger en un clic">
+          <!-- Title with animated gradient -->
+          <div class="logo-title" aria-hidden="true">
+            <span class="gradient">MyWeda</span>
+          </div>
+          <div class="tagline">La météo pour le Niger en un clic.</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <!-- Moon / theme toggle -->
+        <button id="darkModeToggle" aria-label="Basculer thème sombre / clair" title="Basculer thème">
+          <!-- stylized moon (CSS will adjust color) -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+          </svg>
+        </button>
+      </div>
     </header>
 
-    <!-- CONTENU PRINCIPAL -->
-    <main class="container mx-auto px-4 pb-12">
-        <div class="max-w-2xl mx-auto">
-            <!-- RECHERCHE -->
-            <section class="relative my-8 animate-fade-in-up" style="animation-delay: 100ms;">
-                <div class="relative">
-                    <input id="searchInput" type="text" class="w-full pl-5 pr-16 py-4 text-lg bg-white/80 dark:bg-slate-800/80 rounded-full shadow-md dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-300 placeholder-slate-400 dark:placeholder-slate-500" placeholder="Rechercher une ville...">
-                    <button id="searchBtn" class="absolute top-1/2 right-2 -translate-y-1/2 w-12 h-12 bg-sky-500 text-white rounded-full flex items-center justify-center text-2xl hover:bg-sky-600 active:scale-90 transition-all duration-300 shadow-lg shadow-sky-500/30" aria-label="Rechercher">
-                        <span>🔍</span>
-                    </button>
-                </div>
-                <div id="dropdown" class="absolute w-full mt-2 z-10 hidden">
-                    <ul id="cityList" class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl shadow-lg ring-1 ring-slate-200/50 dark:ring-slate-700/50 overflow-hidden">
-                        <!-- Les suggestions seront injectées ici par JS -->
-                    </ul>
-                </div>
-            </section>
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <div class="search" role="search" aria-label="Recherche ville">
+        <input id="searchInput" type="search" placeholder="Rechercher une ville du Niger (ex: Niamey)" aria-label="Rechercher une ville" />
+        <button id="searchBtn" class="search-btn" aria-label="Lancer la recherche">🔍</button>
+      </div>
+    </div>
 
-            <!-- LOADER & ERREUR -->
-            <div id="loading" class="flex items-center justify-center gap-3 my-8 text-slate-500 dark:text-slate-400" style="display:none;">
-                <svg class="animate-spin h-6 w-6 text-sky-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Chargement des données...</span>
-            </div>
-            <div id="errorMessage" class="hidden p-4 my-4 text-center bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg ring-1 ring-red-200 dark:ring-red-800" role="alert"></div>
+    <!-- Autocomplete dropdown (script.js fills cityList) -->
+    <div id="dropdown" aria-hidden="false">
+      <ul id="cityList" role="listbox" aria-label="Suggestions de villes"></ul>
+    </div>
 
-            <!-- MÉTÉO & GRAPHIQUES -->
-            <div class="space-y-8">
-                <section id="weather" class="weather-zone"></section>
-                
-                <div id="chartContainer" class="animate-fade-in-up" style="animation-delay: 300ms; display:none;">
-                    <div id="chartControls" class="flex justify-center gap-4 mb-4">
-                        <button id="tempBtn" class="tab-btn px-6 py-2 rounded-full font-semibold transition-all duration-300 bg-white/80 dark:bg-slate-800/80 shadow-sm hover:shadow-md">Température</button>
-                        <button id="precipBtn" class="tab-btn px-6 py-2 rounded-full font-semibold transition-all duration-300 bg-white/80 dark:bg-slate-800/80 shadow-sm hover:shadow-md">Précipitations</button>
-                    </div>
-                    <section id="chartSection" class="p-4 bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg rounded-2xl shadow-lg shadow-slate-200/40 dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50">
-                        <canvas id="forecastChart"></canvas>
-                    </section>
-                </div>
+    <!-- Loading & error (script.js will toggle) -->
+    <div id="loading" role="status" aria-live="polite">Chargement des données...</div>
+    <div id="errorMessage" role="alert" aria-live="assertive"></div>
+
+    <!-- MAIN GRID -->
+    <main>
+      <div class="grid" role="main">
+        <!-- Left column: Weather + charts -->
+        <div>
+          <!-- Weather section filled by script.js -->
+          <section id="weather" class="card reveal" aria-live="polite" tabindex="0">
+            <!-- script.js injecte le HTML complet ici (current weather, détails) -->
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-weight:900;font-size:1.05rem;">Localisation</div>
+                <div class="weather-meta" id="placeHint">Sélectionnez une ville ou utilisez "Niamey"</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-weight:900;font-size:1.8rem;" id="currentTemp">--°C</div>
+                <div class="weather-meta" id="currentCondition">--</div>
+              </div>
             </div>
 
-            <!-- CARTE INTERACTIVE -->
-            <section id="mapZone" class="my-12 animate-fade-in-up" style="animation-delay: 500ms;">
-                <h2 class="text-2xl font-bold text-center mb-4">Carte Interactive du Niger</h2>
-                <div id="map" class="h-64 md:h-96 w-full rounded-2xl shadow-lg shadow-slate-200/40 dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50"></div>
-            </section>
+            <!-- advice placeholder (script.js will update) -->
+            <div id="adviceBox" class="advice reveal" style="margin-top:12px;">Conseils météorologiques apparaîtront ici.</div>
+          </section>
+
+          <!-- Chart controls (script.js expects this id) -->
+          <div id="chartControls" class="card" style="display:none;">
+            <div style="display:flex;justify-content:center;gap:12px;align-items:center">
+              <button id="tempBtn" class="tab">Température</button>
+              <button id="precipBtn" class="tab">Précipitations</button>
+            </div>
+          </div>
+
+          <!-- Chart section (script.js injects the Chart.js chart into forecastChart) -->
+          <section id="chartSection" class="card" style="display:none;">
+            <canvas id="forecastChart" aria-label="Graphique des prévisions météo" role="img"></canvas>
+          </section>
+
+          <!-- Hourly short forecast (5 hours) - will be used by upgraded JS -->
+          <section class="card reveal" aria-label="Prévisions horaires">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-weight:900;">Prévisions — prochaines 5 heures</div>
+              <div class="weather-meta">Basé sur la dernière mise à jour</div>
+            </div>
+            <div class="hourly-list" id="hourlyForecast">
+              <!-- script.js or next JS version will inject 5 hour items here -->
+              <div class="hour-item">--</div>
+            </div>
+          </section>
         </div>
+
+        <!-- Right column: map + quick info -->
+        <aside>
+          <section class="card reveal" aria-label="Carte interactive">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-weight:900;">Carte interactive</div>
+              <div class="weather-meta">Explorez les communes</div>
+            </div>
+            <div id="map" role="application" aria-label="Carte du Niger"></div>
+          </section>
+
+          <!-- Quick facts / additional tips -->
+          <section class="card reveal" aria-label="Conseils rapides" style="margin-top:18px;">
+            <div style="font-weight:900;margin-bottom:8px;">Conseils rapides</div>
+            <div id="alertsList" class="weather-meta" style="line-height:1.5;">
+              Les conseils basés sur la météo s'afficheront ici.
+            </div>
+          </section>
+
+          <!-- small footer card for credits / data source -->
+          <section class="card reveal" aria-label="À propos" style="margin-top:18px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="font-weight:900;">MyWeda</div>
+              <div class="weather-meta">Données météo : WeatherAPI (configurable)</div>
+              <div class="weather-meta">Conçu par geeko-hub</div>
+            </div>
+          </section>
+        </aside>
+      </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="text-center py-8 px-4 text-slate-500 dark:text-slate-400 text-sm">
-        <p>© 2025 MyWeda — Conçu pour le Niger<span class="font-semibold text-sky-600 dark:text-sky-400">GeekoHub</span>.</p>
-        <p>Données météo iables.</p>
+    <footer class="site" aria-label="Pied de page">
+      © 2024 MyWeda — La météo pour le Niger en un clic.
     </footer>
+  </div>
 
-    <!-- Scripts Externes -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+  <!-- Leaflet JS (before your script) -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <!-- Script pour PWA & Notifications -->
-    <script>
-        // Enregistrement du Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('Service Worker enregistré avec succès.', reg))
-                    .catch(err => console.error('Erreur lors de l\'enregistrement du Service Worker:', err));
-            });
-        }
+  <!-- Ton script existant (ne modifie pas le nom si tu veux que ça marche tel quel) -->
+  <script src="script.js"></script>
 
-        // Demande de permission pour les notifications
-        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-            Notification.requestPermission();
-        }
-        
-        // La fonction sendNotification est déjà dans votre script.js, donc pas besoin de la redéclarer ici.
-    </script>
-</body>
-</html>
+  <!-- Petit script de confort (facultatif) :
+       Ce script n'altère pas ton script.js mais améliore l'initial UX:
+       - Ajoute la classe 'reveal.visible' aux cards au chargement (douce animation).
+       - Gère une souplesse d'affichage pour le dropdown afin d'éviter flicker.
+       (Si tu préfères, supprime ce bloc) -->
+  <script>
+    (function(){
+      // progressive reveal for elements (non-destructive)
+      window.addEventListener('load', ()=> {
+        document.querySelectorAll('.reveal').forEach((el,i)=>{
+          setTimeout(()=> el.classList.add('visible'), 120 + i*90);
+        });
+      });
+
+      /
