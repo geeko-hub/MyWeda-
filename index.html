@@ -2,421 +2,203 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>MyWeda Niger</title>
+    <title>MyWeda</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Manifest PWA -->
+
+    <!-- Manifest PWA & Icons -->
     <link rel="manifest" href="manifest.json">
-    <!-- Favicon & PWA icons -->
     <link rel="icon" type="image/png" href="MyWeda-192.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="MyWeda-192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="MyWeda-512.png">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="MyWeda-192.png">
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Leaflet Map CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-    /* ==== FOND ANIMÉ PARALLAXE & GLASSMORPHISM ==== */
-    body {
-        margin: 0;
-        font-family: 'Montserrat', 'Nunito', 'Roboto', Arial, sans-serif;
-        background: linear-gradient(120deg, #43cea2 0%, #185a9d 100%);
-        min-height: 100vh;
-        color: #1a2633;
-        transition: background 0.8s cubic-bezier(.68,-0.55,.27,1.55), color 0.3s;
-        overflow-x: hidden;
-    }
-    .parallax-bg {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh; z-index: -1; pointer-events: none; overflow: hidden;
-    }
-    .cloud { position: absolute; opacity: 0.62; animation: cloudmove 40s linear infinite; filter: drop-shadow(0 8px 24px #43cea244);}
-    .cloud-1 { width: 210px; height: 70px; top: 7%; left: 6%; animation-delay: 0s;}
-    .cloud-2 { width: 280px; height: 92px; top: 29%; left: 58%; animation-delay: 11s;}
-    .cloud-3 { width: 140px; height: 44px; top: 51%; left: 24%; animation-delay: 17s;}
-    .cloud-4 { width: 120px; height: 38px; top: 84%; left: 60%; animation-delay: 19s;}
-    .cloud-5 { width: 128px; height: 42px; top: 69%; left: 9%; animation-delay: 25s;}
-    @keyframes cloudmove { 0% {transform: translateX(0);} 100% {transform: translateX(60vw);} }
-    ::-webkit-scrollbar { width: 10px; background: #e0f7fa;}
-    ::-webkit-scrollbar-thumb { background: linear-gradient(120deg,#43cea2 10%,#185a9d 90%); border-radius: 6px;}
-    ::selection { background: #43cea2; color: #fff; }
+        /* Configuration de base avec la police Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-    /* ==== HEADER PREMIUM ==== */
-    .site-header {
-        position: sticky; top: 0; width: 100vw;
-        backdrop-filter: blur(16px);
-        background: rgba(255,255,255,0.77);
-        box-shadow: 0 4px 24px #43cea222;
-        z-index: 50; text-align: center;
-        padding: 2em 0 1em 0;
-        border-bottom: 2px solid #43cea2;
-        border-radius: 0 0 32px 32px;
-        transition: background 0.4s;
-    }
-    .brand {
-        display: flex; align-items: center; justify-content: center; gap: 1.2em; margin-bottom: 0.3em;
-    }
-    .brand-logo {
-        width: 62px; height: 62px;
-        filter: drop-shadow(0 8px 24px #43cea244); transition: transform 0.2s;
-    }
-    .brand-logo:hover { transform: scale(1.13) rotate(-8deg);}
-    h1 {
-        font-size: 2.5em; font-weight: 700; color: #185a9d;
-        letter-spacing: 0.05em; margin: 0;
-        text-shadow: 0 2px 24px #43cea266;
-        font-family: 'Montserrat', Arial, sans-serif;
-    }
-    .tagline {
-        font-size: 1.14em; color: #43cea2; font-weight: 600;
-        margin-top: 0.6em; font-family: 'Nunito', Arial, sans-serif;
-        text-shadow: 0 2px 12px #185a9d22; transition: color 0.3s;
-    }
-    .dark-toggle {
-        position: absolute; right: 2.5em; top: 2.2em;
-        background: #43cea2; color: #185a9d;
-        border: none; border-radius: 50%; width: 42px; height: 42px;
-        font-size: 1.6em; box-shadow: 0 2px 16px #43cea222;
-        cursor: pointer; transition: background 0.3s, color 0.3s;
-    }
-    .dark-toggle:hover { background: #185a9d; color: #fff;}
+        /* Effet "Aurore Boréale" pour le fond */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
 
-    /* ==== MAIN & CARDS GLASSMORPHISM ==== */
-    .content {
-        max-width: 650px;
-        margin: 3.5em auto 0 auto;
-        padding: 0 1.4em 2em 1.4em;
-        background: rgba(255,255,255,0.82);
-        border-radius: 32px;
-        box-shadow: 0 8px 48px #185a9d33;
-        position: relative;
-        z-index: 3;
-        border: 2px solid #43cea211;
-    }
+        .aurora-bg::before, .aurora-bg::after {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(150px);
+            mix-blend-mode: screen;
+            animation: aurora-flow 20s linear infinite alternate;
+        }
 
-    /* ==== SEARCH ZONE ==== */
-    .search-zone { margin-bottom: 2.4em;}
-    .input-group {
-        display: flex; gap: 0.7em;
-        background: rgba(67,206,162,0.08);
-        border-radius: 36px;
-        box-shadow: 0 4px 28px #43cea210;
-        padding: 0.32em 1em; align-items: center;
-    }
-    .search-field {
-        flex: 1; border: none; outline: none;
-        font-size: 1.17em; background: transparent;
-        color: #185a9d; padding: 1.1em 0.2em;
-        font-family: 'Nunito', Arial, sans-serif;
-        border-radius: 32px; letter-spacing: 0.04em;
-        transition: color 0.2s;
-    }
-    .search-action {
-        background: linear-gradient(120deg,#185a9d 30%,#43cea2 100%);
-        color: #fff; border: none; border-radius: 32px;
-        font-size: 1.25em; padding: 0.62em 1.3em;
-        cursor: pointer; font-weight: 700;
-        box-shadow: 0 2px 12px #43cea244;
-        transition: background 0.2s, color 0.18s;
-    }
-    .search-action:hover {
-        background: #43cea2; color: #185a9d; font-weight: 800;
-        box-shadow: 0 2px 24px #43cea244;
-    }
+        .aurora-bg::before {
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(59, 130, 246, 0) 70%);
+            top: -20%;
+            left: -20%;
+        }
 
-    /* ==== SUGGESTIONS ==== */
-    .suggestions { position: relative; width: 100%; z-index: 10;}
-    .suggestions ul {
-        background: rgba(255,255,255,0.98);
-        margin: 0; padding: 0.3em 0;
-        border-radius: 16px;
-        box-shadow: 0 2px 24px #43cea210;
-        border: 1px solid #43cea211;
-        list-style: none; max-height: 240px; overflow-y: auto;
-    }
-    .suggestions ul li {
-        padding: 0.85em 1.2em; cursor: pointer;
-        display: flex; justify-content: space-between;
-        font-size: 1.17em; border-bottom: 1px solid #43cea211;
-        transition: background 0.17s, color 0.17s;
-    }
-    .suggestions ul li:last-child { border-bottom: none;}
-    .suggestions ul li:hover {
-        background: #43cea222; color: #185a9d; font-weight: 700;
-    }
+        .aurora-bg::after {
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0) 70%);
+            bottom: -20%;
+            right: -20%;
+            animation-delay: -10s;
+        }
+        
+        body.dark-mode .aurora-bg::before {
+             background: radial-gradient(circle, rgba(20, 83, 45, 0.5) 0%, rgba(22, 101, 52, 0) 70%);
+        }
+        body.dark-mode .aurora-bg::after {
+            background: radial-gradient(circle, rgba(30, 64, 175, 0.4) 0%, rgba(37, 99, 235, 0) 70%);
+        }
 
-    /* ==== LOADER ANIMÉ ==== */
-    .loader {
-        display: flex; align-items: center; gap: 1.2em;
-        margin: 1.3em 0; justify-content: center;
-    }
-    .spinner {
-        width: 38px; height: 38px;
-        border: 4px solid #e0f7fa;
-        border-top: 4px solid #43cea2;
-        border-radius: 50%;
-        animation: spin 0.9s linear infinite;
-        box-shadow: 0 2px 16px #43cea244;
-    }
-    @keyframes spin { to {transform: rotate(360deg);} }
+        @keyframes aurora-flow {
+            from { transform: translateX(-10%) translateY(5%) rotate(0deg); }
+            to { transform: translateX(10%) translateY(-5%) rotate(30deg); }
+        }
 
-    /* ==== ERROR ==== */
-    .errorbox {
-        background: linear-gradient(90deg,#ef4444 60%,#185a9d 100%);
-        color: #fff; padding: 1em 1.2em;
-        border-radius: 14px; margin: 1.2em 0;
-        text-align: center; font-weight: 800;
-        box-shadow: 0 2px 16px #ef444455;
-        font-family: 'Nunito', Arial, sans-serif;
-        font-size: 1.13em;
-    }
-
-    /* ==== WEATHER CARD ==== */
-    .weather-zone {margin: 1.2em 0 2em 0;}
-    .weather-card {
-        background: linear-gradient(120deg,#e0f7fa 60%, #f3e7e9 100%);
-        border-radius: 24px;
-        box-shadow: 0 4px 36px #43cea244;
-        padding: 1.6em 1.4em 1.2em 1.4em;
-        margin-bottom: 1.4em;
-        display: flex; flex-direction: column; align-items: center;
-        animation: fadeInUp 0.9s cubic-bezier(.68,-0.55,.27,1.55);
-    }
-    @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(60px);}
-        100% { opacity: 1; transform: translateY(0);}
-    }
-    .weather-header h2 {
-        margin: 0 0 0.3em 0; font-size: 1.32em;
-        color: #185a9d; font-weight: 700;
-        text-shadow: 0 1px 12px #43cea210;
-    }
-    .current-weather {
-        display: flex; align-items: center; gap: 1.3em;
-        flex-wrap: wrap; margin-top: 0.6em;
-    }
-    .weather-icon-large {
-        width: 82px; height: 82px; margin-right: 1em;
-        filter: drop-shadow(0 10px 24px #43cea244);
-        transition: transform 0.2s;
-    }
-    .weather-icon-large:hover { transform: scale(1.07);}
-    .temperature-info {
-        display: flex; flex-direction: column; gap: 0.32em; align-items: flex-start;
-    }
-    .temperature {
-        font-size: 2.55em; font-weight: 800;
-        color: #43cea2; margin-bottom: 0.15em;
-        text-shadow: 0 2px 16px #185a9d22;
-        font-family: 'Montserrat', Arial, sans-serif;
-    }
-    .condition {
-        font-size: 1.13em; color: #185a9d; font-weight: 700;
-        font-family: 'Nunito', Arial, sans-serif;
-    }
-    .weather-details {
-        display: flex; flex-direction: column; gap: 0.7em; min-width: 130px;
-        font-size: 1.09em; color: #43cea2; font-family: 'Nunito', Arial, sans-serif;
-    }
-    .detail-item {
-        font-size: 1.03em; color: #185a9d; font-weight: 700;
-        display: flex; align-items: center; gap: 0.55em;
-    }
-
-    /* ==== GRAPH CONTROLS ==== */
-    .graph-controls {margin: 2em 0 0.9em 0; text-align: center;}
-    .tab-btn {
-        background: linear-gradient(120deg,#43cea2 40%,#185a9d 100%);
-        color: #fff; border: none; padding: 0.68em 1.3em;
-        border-radius: 28px; font-weight: 700;
-        cursor: pointer; font-size: 1.13em; margin: 0 0.5em;
-        box-shadow: 0 2px 16px #43cea244;
-        transition: background 0.18s, color 0.18s;
-    }
-    .tab-btn.active, .tab-btn:hover {
-        background: linear-gradient(120deg,#185a9d 10%,#43cea2 90%);
-        color: #fff;
-    }
-
-    /* ==== CHART ==== */
-    .graph-zone {
-        background: #e0f7fa;
-        border-radius: 24px;
-        box-shadow: 0 2px 24px #43cea244;
-        padding: 1.5em 0.8em 1.2em 0.8em;
-        margin-bottom: 2.4em;
-        animation: fadeInUp 0.9s cubic-bezier(.68,-0.55,.27,1.55);
-    }
-    canvas { width: 100% !important; height: 260px !important; }
-
-    /* ==== LEAFLET MAP ==== */
-    #mapZone { margin:2em 0;}
-    #map { height:320px; border-radius:18px; box-shadow: 0 2px 24px #43cea233; }
-
-    /* ==== FOOTER ==== */
-    .site-footer {
-        background: rgba(67,206,162,0.13);
-        color: #185a9d; text-align: center;
-        padding: 1.2em 0 0.7em 0; font-size: 1.07em;
-        margin-top: 3em; border-radius: 0 0 24px 24px;
-        box-shadow: 0 -4px 24px #43cea233;
-        font-family: 'Nunito', Arial, sans-serif;
-        letter-spacing: 0.02em;
-    }
-
-    /* ==== RESPONSIVE ==== */
-    @media (max-width: 700px) {
-        .content { padding: 0 0.5em 2em 0.5em; }
-        .weather-card { padding: 1em 0.5em 0.7em 0.5em; }
-        .current-weather { flex-direction: column; gap: 1.1em;}
-        .brand-logo { width: 44px; height: 44px;}
-        #map { height: 220px;}
-    }
-    @media (max-width: 420px) {
-        h1 { font-size: 1.33em;}
-        .site-footer { font-size: 0.91em;}
-        .weather-header h2 { font-size: 1em;}
-        .brand-logo { width: 30px; height: 30px;}
-        #map { height: 120px;}
-    }
-    /* ==== MODE SOMBRE PREMIUM ==== */
-    body.dark-mode {
-        background: linear-gradient(120deg, #232526 0%, #272b2e 100%);
-        color: #e7f7f7;
-    }
-    body.dark-mode .site-header {
-        background: rgba(34,37,38,0.92);
-        border-bottom: 2px solid #43cea2;
-    }
-    body.dark-mode h1, body.dark-mode .tagline {color: #43cea2;}
-    body.dark-mode .content { background: rgba(34,37,38,0.88);}
-    body.dark-mode .input-group { background: rgba(67,206,162,0.08);}
-    body.dark-mode .search-field { color: #43cea2;}
-    body.dark-mode .search-action { background: linear-gradient(120deg,#43cea2 60%,#185a9d 100%);}
-    body.dark-mode .suggestions ul { background: rgba(34,37,38,0.97);}
-    body.dark-mode .suggestions ul li:hover { background: #185a9d22; color: #43cea2;}
-    body.dark-mode .weather-card, body.dark-mode .graph-zone, body.dark-mode #mapZone {
-        background: linear-gradient(120deg,#232526 60%,#185a9d 100%);
-        color: #e7f7f7;
-    }
-    body.dark-mode .temperature { color: #43cea2;}
-    body.dark-mode .site-footer { background: rgba(34,37,38,0.92); color: #43cea2;}
+        /* Animation d'apparition personnalisée */
+        @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+        
+        /* Style pour les boutons de graphique actifs */
+        .tab-btn.active {
+            background: linear-gradient(120deg, #0ea5e9, #6366f1);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
-<body>
-    <!-- Fond animé Parallaxe SVG -->
-    <div class="parallax-bg">
-        <svg class="cloud cloud-1"><ellipse cx="105" cy="35" rx="105" ry="35" fill="#fff"/></svg>
-        <svg class="cloud cloud-2"><ellipse cx="140" cy="46" rx="140" ry="46" fill="#fff"/></svg>
-        <svg class="cloud cloud-3"><ellipse cx="70" cy="22" rx="70" ry="22" fill="#fff"/></svg>
-        <svg class="cloud cloud-4"><ellipse cx="60" cy="19" rx="60" ry="19" fill="#fff"/></svg>
-        <svg class="cloud cloud-5"><ellipse cx="64" cy="21" rx="64" ry="21" fill="#fff"/></svg>
-    </div>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 transition-colors duration-500">
+
+    <!-- Fond animé "Aurore" -->
+    <div class="aurora-bg"></div>
+
     <!-- HEADER -->
-    <header class="site-header">
-        <div class="brand">
-            <img src="MyWeda-192.png" alt="Logo météo" class="brand-logo">
-            <h1>MyWeda Niger</h1>
+    <header class="sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4">
+            <div class="my-4 p-4 bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg rounded-2xl shadow-lg shadow-slate-200/40 dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="MyWeda-192.png" alt="Logo MyWeda" class="w-12 h-12 md:w-14 md:h-14 transition-transform duration-300 hover:scale-110 hover:rotate-[-12deg]">
+                    <div>
+                        <h1 class="text-xl md:text-3xl font-extrabold text-slate-900 dark:text-white">MyWeda Niger</h1>
+                        <p class="text-xs md:text-sm text-sky-600 dark:text-sky-400 font-medium">La météo NextGen pour le Niger</p>
+                    </div>
+                </div>
+                <button id="darkModeToggle" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 dark:focus:ring-offset-slate-900" title="Changer de thème">
+                    <span class="dark:hidden">🌙</span>
+                    <span class="hidden dark:inline">☀️</span>
+                </button>
+            </div>
         </div>
-        <p class="tagline">La météo NextGen, style premium, pour toutes les communes du Niger</p>
-        <button id="darkModeToggle" class="dark-toggle" title="Mode sombre">🌙</button>
     </header>
-    <main class="content">
-        <!-- RECHERCHE -->
-        <section class="search-zone">
-            <div class="input-group">
-                <input id="searchInput" type="text" class="search-field" placeholder="Tapez une ville du Niger..." aria-label="Recherche ville Niger">
-                <button id="searchBtn" class="search-action" aria-label="Rechercher">🔍</button>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="container mx-auto px-4 pb-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- RECHERCHE -->
+            <section class="relative my-8 animate-fade-in-up" style="animation-delay: 100ms;">
+                <div class="relative">
+                    <input id="searchInput" type="text" class="w-full pl-5 pr-16 py-4 text-lg bg-white/80 dark:bg-slate-800/80 rounded-full shadow-md dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-300 placeholder-slate-400 dark:placeholder-slate-500" placeholder="Rechercher une ville...">
+                    <button id="searchBtn" class="absolute top-1/2 right-2 -translate-y-1/2 w-12 h-12 bg-sky-500 text-white rounded-full flex items-center justify-center text-2xl hover:bg-sky-600 active:scale-90 transition-all duration-300 shadow-lg shadow-sky-500/30" aria-label="Rechercher">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <div id="dropdown" class="absolute w-full mt-2 z-10 hidden">
+                    <ul id="cityList" class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl shadow-lg ring-1 ring-slate-200/50 dark:ring-slate-700/50 overflow-hidden">
+                        <!-- Les suggestions seront injectées ici par JS -->
+                    </ul>
+                </div>
+            </section>
+
+            <!-- LOADER & ERREUR -->
+            <div id="loading" class="flex items-center justify-center gap-3 my-8 text-slate-500 dark:text-slate-400" style="display:none;">
+                <svg class="animate-spin h-6 w-6 text-sky-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Chargement des données...</span>
             </div>
-            <div id="dropdown" class="suggestions">
-                <ul id="cityList"></ul>
+            <div id="errorMessage" class="hidden p-4 my-4 text-center bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg ring-1 ring-red-200 dark:ring-red-800" role="alert"></div>
+
+            <!-- MÉTÉO & GRAPHIQUES -->
+            <div class="space-y-8">
+                <section id="weather" class="weather-zone"></section>
+                
+                <div id="chartContainer" class="animate-fade-in-up" style="animation-delay: 300ms; display:none;">
+                    <div id="chartControls" class="flex justify-center gap-4 mb-4">
+                        <button id="tempBtn" class="tab-btn px-6 py-2 rounded-full font-semibold transition-all duration-300 bg-white/80 dark:bg-slate-800/80 shadow-sm hover:shadow-md">Température</button>
+                        <button id="precipBtn" class="tab-btn px-6 py-2 rounded-full font-semibold transition-all duration-300 bg-white/80 dark:bg-slate-800/80 shadow-sm hover:shadow-md">Précipitations</button>
+                    </div>
+                    <section id="chartSection" class="p-4 bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg rounded-2xl shadow-lg shadow-slate-200/40 dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50">
+                        <canvas id="forecastChart"></canvas>
+                    </section>
+                </div>
             </div>
-        </section>
-        <!-- LOADER -->
-        <div id="loading" class="loader" style="display:none;">
-            <span class="spinner"></span>
-            <span>Chargement météo...</span>
+
+            <!-- CARTE INTERACTIVE -->
+            <section id="mapZone" class="my-12 animate-fade-in-up" style="animation-delay: 500ms;">
+                <h2 class="text-2xl font-bold text-center mb-4">Carte Interactive du Niger</h2>
+                <div id="map" class="h-64 md:h-96 w-full rounded-2xl shadow-lg shadow-slate-200/40 dark:shadow-black/20 ring-1 ring-slate-200/50 dark:ring-slate-700/50"></div>
+            </section>
         </div>
-        <!-- ERREUR -->
-        <div id="errorMessage" class="errorbox" style="display:none;" role="alert"></div>
-        <!-- MÉTÉO -->
-        <section id="weather" class="weather-zone"></section>
-        <!-- CONTROLES GRAPHIQUE -->
-        <div id="chartControls" class="graph-controls" style="display:none;">
-            <button id="tempBtn" class="tab-btn active">Température</button>
-            <button id="precipBtn" class="tab-btn">Précipitations</button>
-        </div>
-        <!-- GRAPHIQUE -->
-        <section id="chartSection" class="graph-zone" style="display:none;">
-            <canvas id="forecastChart"></canvas>
-        </section>
-        <!-- CARTE INTERACTIVE -->
-        <section id="mapZone">
-            <h2 style="text-align:center;">Carte interactive du Niger</h2>
-            <div id="map"></div>
-        </section>
     </main>
-    <footer class="site-footer">
-        <small>
-            © 2025 MyWeda |Météo pour le Niger <br>
-            <span style="color:#43cea2; font-weight:700;">Développé par GeekoHub</span>
-        </small>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-8 px-4 text-slate-500 dark:text-slate-400 text-sm">
+        <p>© 2025 MyWeda — Conçu pour le Niger<span class="font-semibold text-sky-600 dark:text-sky-400">GeekoHub</span>.</p>
+        <p>Données météo iables.</p>
     </footer>
 
-    <!-- Leaflet JS -->
+    <!-- Scripts Externes -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Ton JS principal -->
     <script src="script.js"></script>
-    <!-- Enregistrement du Service Worker PWA -->
+
+    <!-- Script pour PWA & Notifications -->
     <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').then(reg => {
-          console.log('Service Worker enregistré!', reg);
-        }).catch(err => {
-          console.error('Erreur Service Worker:', err);
-        });
-      });
-    }
-    </script>
-    <!-- Activation notifications locales -->
-    <script>
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      Notification.requestPermission();
-    }
-    function sendNotification(title, body) {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        navigator.serviceWorker.getRegistration().then(reg => {
-          if (reg) reg.showNotification(title, { body: body, icon: 'MyWeda-192.png' });
-        });
-      }
-    }
-    // Exemple d'appel automatique après affichage météo :
-    // sendNotification('Nouvelle météo disponible!', 'Consulte la météo de Niamey.');
-    </script>
-    <!-- Carte interactive Leaflet -->
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // Affiche la carte centrée sur le Niger
-      const map = L.map('map').setView([17.6078, 8.0817], 6);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-      // Exemple de villes (ajoute-en plus facilement)
-      const villes = [
-        {nom: "Niamey", lat: 13.5128, lon: 2.1128},
-        {nom: "Agadez", lat: 16.9736, lon: 7.9911},
-        {nom: "Zinder", lat: 13.779, lon: 8.9881},
-        {nom: "Maradi", lat: 13.5, lon: 7.1}
-      ];
-      villes.forEach(ville => {
-        L.marker([ville.lat, ville.lon])
-          .addTo(map)
-          .bindPopup(`<strong>${ville.nom}</strong>`);
-      });
-    });
+        // Enregistrement du Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service Worker enregistré avec succès.', reg))
+                    .catch(err => console.error('Erreur lors de l\'enregistrement du Service Worker:', err));
+            });
+        }
+
+        // Demande de permission pour les notifications
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+        }
+        
+        // La fonction sendNotification est déjà dans votre script.js, donc pas besoin de la redéclarer ici.
     </script>
 </body>
 </html>
